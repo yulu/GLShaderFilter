@@ -1,10 +1,14 @@
 package com.littlecheesecake.glshaderfilter.gl;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Surface;
 
 import com.littlecheesecake.glshaderfilter.api.ShaderFilterType;
 
@@ -17,13 +21,13 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by luyu on 18/8/14.
  */
 public class FilterRenderer extends GLSurfaceView
-        implements  GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener{
+        implements  GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener, DisplayParameter{
+    private Context mContext;
 
     //shader program
     private Shader filterShader;
 
     //SurfaceTexture, related to camera
-    private FilterCamera mCamera;
     private SurfaceTexture mSurfaceTexture;
     private OESTexture mCameraTexture;
     private int mWidth, mHeight;
@@ -31,7 +35,13 @@ public class FilterRenderer extends GLSurfaceView
 
     //OpenGL params
     private ByteBuffer mFullQuadVertices;
+    private float[] mRatio = new float[2];
+    private float[] mRatioPreview = new float[2];
+    private float mOrientationM[] = new float[16];
     private float[] mTransformM = new float[16];
+
+    //listener
+    private SurfaceChangedListener listener;
 
 
     public FilterRenderer(Context context) {
@@ -47,6 +57,8 @@ public class FilterRenderer extends GLSurfaceView
     }
 
     private void init(Context context) {
+        mContext = context;
+
         //init screen quad geometry data
         final byte FULL_QUAD_COORDS[] = { -1, 1, -1, -1, 1, 1, 1, -1};;
         mFullQuadVertices = ByteBuffer.allocateDirect(4 * 2);
@@ -61,9 +73,23 @@ public class FilterRenderer extends GLSurfaceView
         //set up the shader
         filterShader = new Shader(context);
         mCameraTexture = new OESTexture();
+    }
 
-        //set up camera
-        mCamera = new FilterCamera();
+    public interface SurfaceChangedListener {
+        public void OnSurfaceChanged(SurfaceTexture surfaceTexture, int width, int height);
+    }
+
+    public void RegisterSurfaceChangedListener(SurfaceChangedListener l) {
+        listener = l;
+    }
+
+    public SurfaceTexture getSurfaceTexture(){
+
+        return mSurfaceTexture;
+    }
+
+    public int[] getSurfaceSize(){
+        return new int[]{mWidth, mHeight};
     }
 
     @Override
@@ -80,6 +106,8 @@ public class FilterRenderer extends GLSurfaceView
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         if(updateTexture && mSurfaceTexture != null) {
+            updateRatioPreview();
+
             mSurfaceTexture.updateTexImage();
             mSurfaceTexture.getTransformMatrix(mTransformM);
 
@@ -93,10 +121,13 @@ public class FilterRenderer extends GLSurfaceView
             int uTransform = filterShader.getHandle("uTransformM");
             int uOrientation = filterShader.getHandle("uOrientationM");
             int uRatio = filterShader.getHandle("uRatio");
+            int uRatioPreview = filterShader.getHandle("uRatioPreview");
+
 
             GLES20.glUniformMatrix4fv(uTransform, 1, false, mTransformM, 0);
-            GLES20.glUniformMatrix4fv(uOrientation, 1, false, mCamera.getOrientation(), 0);
-            GLES20.glUniform2fv(uRatio, 1, mCamera.getAspectRatio(), 0);
+            GLES20.glUniformMatrix4fv(uOrientation, 1, false, mOrientationM, 0);
+            GLES20.glUniform2fv(uRatio, 1, mRatio, 0);
+            GLES20.glUniform2fv(uRatioPreview, 1, mRatioPreview, 0);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mCameraTexture.getTextureId());
@@ -107,33 +138,25 @@ public class FilterRenderer extends GLSurfaceView
 
     @Override
     public synchronized void onSurfaceChanged(GL10 gl, int width, int height) {
+
         mWidth = width;
         mHeight = height;
 
-        //TODO: check if camera starts alr, if start, restart the camera with new w h
-        startCameraRender();
-    }
-
-    @Override
-    public synchronized void onSurfaceCreated(GL10 gl, EGLConfig config) {
-
-        try {
-            filterShader.setProgramWithFilter(ShaderFilterType.FILTER_MANGA);
-        } catch (Exception e) {
-            e.printStackTrace();
+        //check orientation of the device
+        if(mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Matrix.setRotateM(mOrientationM, 0, 90.0f, 0f, 0f, 1f);
         }
-    }
+        else {
+            Matrix.setRotateM(mOrientationM, 0, 00.0f, 0f, 0f, 1f);
+        }
 
-
-    /**
-     * change the rendering parameters according to the camera
-     * init SurfaceTexture especially
-     */
-    private synchronized  void startCameraRender() {
-        //generate camera texture
-        mCameraTexture.init();
+        //set ratio
+        mRatio[0] = (float) Math.min(mWidth, mHeight) / mWidth;
+        mRatio[1] = (float) Math.min(mWidth, mHeight) / mHeight;
 
         //set up surfacetexture------------------
+        mCameraTexture.init();
+
         SurfaceTexture oldSurfaceTexture = mSurfaceTexture;
         mSurfaceTexture = new SurfaceTexture(mCameraTexture.getTextureId());
         mSurfaceTexture.setOnFrameAvailableListener(this);
@@ -141,10 +164,48 @@ public class FilterRenderer extends GLSurfaceView
             oldSurfaceTexture.release();
         }
 
-        mCamera.start(mSurfaceTexture, mWidth, mHeight);
+        //for camera, width is always larger than height;
+        int surfaceWidth, surfaceHeight;
+        if(width > height) {
+            surfaceWidth = width;
+            surfaceHeight = height;
+        } else {
+            surfaceWidth = height;
+            surfaceHeight = width;
+        }
 
-        requestRender();
+        if(listener != null)
+            listener.OnSurfaceChanged(mSurfaceTexture, surfaceWidth, surfaceHeight);
     }
+
+    @Override
+    public synchronized void onSurfaceCreated(GL10 gl, EGLConfig config) {
+
+        try {
+            filterShader.setProgramWithFilter(ShaderFilterType.FILTER_NONE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private synchronized void updateRatioPreview(){
+        int frameWidth, frameHeight;
+
+        frameWidth = mFrameSize[0];
+        frameHeight = mFrameSize[1];
+
+        //check the orientation for correct w/h ratio of camera frame
+        if(mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mRatioPreview[1] = (float) Math.min(frameWidth, frameHeight) / frameWidth;
+            mRatioPreview[0] = (float) Math.min(frameWidth, frameHeight) / frameHeight;
+        }
+        else {
+            mRatioPreview[0] = (float) Math.min(frameWidth, frameHeight) / frameWidth;
+            mRatioPreview[1] = (float) Math.min(frameWidth, frameHeight) / frameHeight;
+        }
+
+    }
+
 
     /**
      * change the shader filter type
@@ -170,25 +231,12 @@ public class FilterRenderer extends GLSurfaceView
     }
 
     /**
-     * get the camera
-     * @return FilterCamera
-     */
-    public FilterCamera getCamera() {
-        return mCamera;
-    }
-
-    /**
      * when the surface destroys
      */
     public void onDestroy(){
         updateTexture = false;
         mSurfaceTexture.release();
 
-        if(mCamera != null){
-            mCamera.onPause();
-        }
-
-        mCamera = null;
     }
 
     private void renderQuad(int aPosition) {
