@@ -10,7 +10,7 @@ import com.littlecheesecake.glshaderfilter.gl.FilterRenderer;
 public class ShaderCamera{
     private static ShaderCamera mSC;
     private FilterRenderer mFilterRenderer;
-    private FilterCamera mCamera;
+    private FilterCamera mFilterCamera;
 
     public static ShaderCamera getInstance(FilterRenderer r) {
         if (mSC == null)
@@ -21,15 +21,55 @@ public class ShaderCamera{
 
     private ShaderCamera(FilterRenderer r) {
         mFilterRenderer = r;
-        mCamera = r.getCamera();
     }
 
-    public void openCamera(int which) {
-        //mFilterRenderer.startCameraRender();
+    /**
+     * Register camera with the renderer surface, this method needs to be called in OnStart()
+     * @param renderer
+     */
+    public void registerCamera(FilterRenderer renderer) {
+        mFilterCamera = new FilterCamera();
+        renderer.RegisterSurfaceChangedListener(mFilterCamera);
     }
 
-    public void shutdownCamera() {
+    /**
+     * Start or restart the camera, this method needs to be called in OnResume()
+     * or whenever the you want to restart a stopped camera view when the renderer surface is not destroyed
+     */
+    public void restartCamera() {
+        mFilterRenderer.onResume();
+        mFilterCamera.onResume(mFilterRenderer.getSurfaceTexture(), mFilterRenderer.getSurfaceSize());
+    }
 
+    /**
+     * Stop the camera and pause the renderer, this method needs to be called in OnPause()
+     */
+    public void stopCamera() {
+        mFilterCamera.onPause();
+        mFilterRenderer.onPause();
+    }
+
+    /**
+     * Stop the camera, this method is to be called whenever you want to stop the camera, but keep the renderer
+      */
+    public void pauseCamera() {
+        mFilterCamera.onPause();
+    }
+
+    /**
+     * Switch between back and front camera
+     */
+    public void switchCamera() {
+        //do it in another thread
+        if (mFilterCamera != null ) {
+            Thread t = new Thread() {
+                public void run() {
+                    mFilterCamera.flipit();
+                }
+            };
+
+            t.start();
+        }
     }
 
     public void setFilter(int filterType) {
@@ -40,15 +80,7 @@ public class ShaderCamera{
         mFilterRenderer.setCustomerFilterShader(rawId);
     }
 
-    public void switchCamera() {
+    public void takePicture() {}
 
-        //TODO: another thread!!
-        if (mCamera != null ) {
-            mCamera.flipit();
-        }
-    }
 
-    public void takePicture() {
-
-    }
 }

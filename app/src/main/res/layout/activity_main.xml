@@ -6,7 +6,32 @@
 
     <com.littlecheesecake.glshaderfilter.gl.FilterRenderer
         android:id="@+id/cameraview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="400dip"
+        android:layout_height="400dip" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/set_filter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="change filter"/>
+        <Button
+            android:id="@+id/stop_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="stop"/>
+        <Button
+            android:id="@+id/start_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="start"/>
+        <Button
+            android:id="@+id/flip_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="flip"/>
+    </LinearLayout>
 
 </RelativeLayout>

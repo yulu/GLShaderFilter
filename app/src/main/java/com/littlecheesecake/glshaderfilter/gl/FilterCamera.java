@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by luyu on 18/8/14.
  */
-public class FilterCamera {
+public class FilterCamera implements FilterRenderer.SurfaceChangedListener, DisplayParameter{
     private static final int MAX_UNSPECIFIED = -1;
 
     //which camera
@@ -28,8 +28,7 @@ public class FilterCamera {
     private Camera.Parameters params;
     private SurfaceTexture mSurfaceTexture;
 
-    private float mAspectRatioPreview[] = new float[2];
-    private float mOrientationM[] = new float[16];
+    //private float mAspectRatioPreview[] = new float[2];
     private int mFrameWidth;
     private int mFrameHeight;
     private int mMaxWidth;
@@ -53,39 +52,19 @@ public class FilterCamera {
         mMaxHeight = MAX_UNSPECIFIED;
     }
 
-    public float[] getAspectRatio() {
-        return mAspectRatioPreview;
-    }
 
-    public float[] getOrientation() {
-        return mOrientationM;
-    }
-
-    public void start(SurfaceTexture surfaceTexture, int width, int height) {
+    @Override
+    public void OnSurfaceChanged(SurfaceTexture surfaceTexture, int width, int height) {
         try{
             //disableView();
-            setDimension(height, width);
+            mCamera.stopPreview();
+            setDimension(width, height);
             setPreviewTexture(surfaceTexture);
-            Log.d("Camera", "set mSurfaceTexture");
             initializeCamera(which);
 
         }catch(final Exception ex){
             ex.printStackTrace();
         }
-    }
-
-    /**
-     * Forwards call to camera.startpreview
-     */
-    public void startPreview(){
-        mCamera.startPreview();
-    }
-
-    /**
-     * Forwards call to camera.stoppreview
-     */
-    public void stopPreview(){
-        mCamera.stopPreview();
     }
 
     /**
@@ -96,18 +75,17 @@ public class FilterCamera {
         releaseCamera();
     }
 
-    public float[] getmAspectRatioPreview() {
-        return mAspectRatioPreview;
-    }
-
-    public float[] getmOrientationM() {
-        return mOrientationM;
-    }
-
     /**
      * Should be called from Activity.onResuem()
      */
-    public void onResume(){
+    public void onResume(SurfaceTexture s, int[] mSurfaceSize){
+        setDimension(mSurfaceSize[0], mSurfaceSize[1]);
+        try {
+            setPreviewTexture(s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         if(which == BACK)
             initializeCamera(BACK);
         else
@@ -166,6 +144,8 @@ public class FilterCamera {
         synchronized(this){
             if(mCamera != null){
                 mCamera.stopPreview();
+                mCamera.setPreviewCallback(null);
+
                 mCamera.release();
                 mCamera = null;
             }
@@ -193,8 +173,9 @@ public class FilterCamera {
             if(localCameraIndex != -1){
                 try{
                     mCamera = Camera.open(localCameraIndex);
+                    Log.d("Camera", "Camera #" + localCameraIndex + " open this camera");
                 }catch(RuntimeException e){
-                    Log.e("Camera", "Camera #" + localCameraIndex + "failed to open: " +
+                    Log.e("Camera", "Camera #" + localCameraIndex + " failed to open: " +
                             e.getLocalizedMessage());
                 }
             }else{
@@ -245,14 +226,8 @@ public class FilterCamera {
                         //orientation and aspect ratio
                         //preview aspect ration
 
-                        Matrix.setRotateM(mOrientationM, 0, 90.0f, 0f, 0f, 1f);
-
-                        int w = mFrameWidth;
-                        mFrameWidth = mFrameHeight;
-                        mFrameHeight = w;
-
-                        mAspectRatioPreview[0] = (float)Math.min(mFrameWidth, mFrameHeight)/mFrameWidth;
-                        mAspectRatioPreview[1] = (float)Math.min(mFrameWidth, mFrameHeight)/mFrameHeight;
+                        mFrameSize[0] = mFrameWidth;
+                        mFrameSize[1] = mFrameHeight;
 
                         //set surface texture
                         if(mSurfaceTexture != null){
@@ -283,14 +258,18 @@ public class FilterCamera {
                 mCamera.setPreviewCallback(null);
 
                 mCamera.release();
-
+                Log.d("Camera", "release camera");
             }
+
             mCamera = null;
+            Log.d("Camera", "set camera null");
             mSurfaceWidth = 0;
             mSurfaceHeight = 0;
 
         }
     }
+
+
 
     public static class CameraSizeAccessor implements ListItemAccessor {
 
