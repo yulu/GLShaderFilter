@@ -26,6 +26,7 @@ public class FilterRenderer extends GLSurfaceView
 
     //shader program
     private Shader filterShader;
+    private int mFilterType = 0;
 
     //SurfaceTexture, related to camera
     private SurfaceTexture mSurfaceTexture;
@@ -102,6 +103,8 @@ public class FilterRenderer extends GLSurfaceView
 
     @Override
     public synchronized void onDrawFrame(GL10 gl) {
+        changeFilter();
+
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
@@ -117,7 +120,6 @@ public class FilterRenderer extends GLSurfaceView
 
             filterShader.useProgram();
 
-            //TODO: pass in some parameters from camera
             int uTransform = filterShader.getHandle("uTransformM");
             int uOrientation = filterShader.getHandle("uOrientationM");
             int uRatio = filterShader.getHandle("uRatio");
@@ -181,11 +183,11 @@ public class FilterRenderer extends GLSurfaceView
     @Override
     public synchronized void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-        try {
+        /*try {
             filterShader.setProgramWithFilter(ShaderFilterType.FILTER_NONE);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private synchronized void updateRatioPreview(){
@@ -212,9 +214,13 @@ public class FilterRenderer extends GLSurfaceView
      * @param type
      */
     public void setFilterShader(int type) {
+         mFilterType = type;
+    }
+
+    private void changeFilter() {
         try {
-            filterShader.changeProgramWithFilter(type);
-        }catch(Exception e) {
+            filterShader.changeProgramWithFilter(mFilterType);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -238,6 +244,7 @@ public class FilterRenderer extends GLSurfaceView
         mSurfaceTexture.release();
 
     }
+
 
     private void renderQuad(int aPosition) {
         GLES20.glVertexAttribPointer(aPosition, 2, GLES20.GL_BYTE, false, 0, mFullQuadVertices);

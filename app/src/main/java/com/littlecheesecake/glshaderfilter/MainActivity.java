@@ -29,7 +29,6 @@ public class MainActivity extends Activity {
 
         mRenderer = (FilterRenderer)findViewById(R.id.cameraview);
         mSC = ShaderCamera.getInstance(mRenderer);
-        mSC.setFilter(ShaderFilterType.FILTER_MANGA);
 
         startButton = (Button)findViewById(R.id.start_camera);
         stopButton = (Button)findViewById(R.id.stop_camera);
@@ -39,28 +38,28 @@ public class MainActivity extends Activity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.restartCamera();
+                mSC.setFilter(ShaderFilterType.FILTER_MANGA);
             }
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.pauseCamera();
+                mSC.setFilter(ShaderFilterType.FILTER_RISE);
             }
         });
 
         flipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.switchCamera();
+                mSC.setFilter(ShaderFilterType.FILTER_NONE);
             }
         });
 
         setFilterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_MANGA);
+                mSC.setFilter(ShaderFilterType.FILTER_MENTAL);
             }
         });
     }
@@ -94,8 +93,10 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        mSC.restartCamera();
+        mRenderer.onResume();
+        mSC.restartCamera(mRenderer);
     }
+
 
     @Override
     public void onStart() {

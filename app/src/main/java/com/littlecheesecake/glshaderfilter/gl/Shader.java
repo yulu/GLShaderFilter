@@ -14,7 +14,7 @@ import java.util.HashMap;
 /**
  * Created by yu lu on 18/8/14.
  */
-public class Shader implements ShaderFilterType {
+public class Shader {
     //Context
     private Context mContext;
 
@@ -67,6 +67,7 @@ public class Shader implements ShaderFilterType {
         if(this.filterType == filterType && mProgram != 0)
             return;
         else{
+            this.filterType = filterType;
             setProgramWithFilter(filterType);
         }
     }
@@ -83,14 +84,14 @@ public class Shader implements ShaderFilterType {
         //load the filer with indicated filter type
         int filterShaderRawId = R.raw.none;
         switch(filterType){
-            case FILTER_MANGA:
+            case ShaderFilterType.FILTER_MANGA:
                 filterShaderRawId = R.raw.manga;
                 break;
-            case FILTER_MENTAL:
-                filterShaderRawId = R.raw.manga;
+            case ShaderFilterType.FILTER_MENTAL:
+                filterShaderRawId = R.raw.metal;
                 break;
-            case FILTER_RISE:
-                filterShaderRawId = R.raw.manga;
+            case ShaderFilterType.FILTER_RISE:
+                filterShaderRawId = R.raw.rise;
                 break;
             default:
                 filterShaderRawId = R.raw.none;
