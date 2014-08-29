@@ -1,3 +1,3 @@
-vec3 filter() {
-    return texture2D(sTexture, vTextureCoord).rgb;
+vec3 filter(vec3 color) {
+    return color;
 }

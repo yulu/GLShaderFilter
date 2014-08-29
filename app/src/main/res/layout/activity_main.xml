@@ -13,22 +13,22 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
         <Button
-            android:id="@+id/set_filter_button"
+            android:id="@+id/filter_1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="filter 1"/>
         <Button
-            android:id="@+id/stop_camera"
+            android:id="@+id/filter_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="filter 2"/>
         <Button
-            android:id="@+id/start_camera"
+            android:id="@+id/filter_3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="filter 3"/>
         <Button
-            android:id="@+id/flip_camera"
+            android:id="@+id/filter_4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="filter 4"/>

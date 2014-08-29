@@ -84,15 +84,38 @@ public class Shader {
         //load the filer with indicated filter type
         int filterShaderRawId = R.raw.none;
         switch(filterType){
-            case ShaderFilterType.FILTER_MANGA:
-                filterShaderRawId = R.raw.manga;
+            case ShaderFilterType.FILTER_SILENCE:
+                filterShaderRawId = R.raw.silence;
                 break;
             case ShaderFilterType.FILTER_MENTAL:
                 filterShaderRawId = R.raw.metal;
                 break;
-            case ShaderFilterType.FILTER_RISE:
-                filterShaderRawId = R.raw.rise;
+            case ShaderFilterType.FILTER_SUN:
+                filterShaderRawId = R.raw.sun;
                 break;
+            case ShaderFilterType.FILTER_ICE:
+                filterShaderRawId = R.raw.ice;
+                break;
+            case ShaderFilterType.FILTER_LIVE:
+                filterShaderRawId = R.raw.live;
+                break;
+            case ShaderFilterType.FILTER_DREAMY:
+                filterShaderRawId = R.raw.dreamy;
+                break;
+            case ShaderFilterType.FILTER_CHOCOLATE:
+                filterShaderRawId = R.raw.chocolate;
+                break;
+            case ShaderFilterType.FILTER_FIREWORKS:
+                filterShaderRawId = R.raw.fireworks;
+                break;
+            case ShaderFilterType.FILTER_OLDTIME:
+                filterShaderRawId = R.raw.oldtime;
+                break;
+            case ShaderFilterType.FILTER_MAY:
+                filterShaderRawId = R.raw.may;
+                break;
+
+
             default:
                 filterShaderRawId = R.raw.none;
                 break;

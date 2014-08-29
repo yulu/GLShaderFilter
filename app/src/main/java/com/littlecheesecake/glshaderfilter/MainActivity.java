@@ -17,10 +17,10 @@ public class MainActivity extends Activity {
     private FilterRenderer mRenderer;
 
     //view
-    private Button startButton;
-    private Button stopButton;
-    private Button setFilterButton;
-    private Button flipButton;
+    private Button button1;
+    private Button button2;
+    private Button button3;
+    private Button button4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,36 +30,36 @@ public class MainActivity extends Activity {
         mRenderer = (FilterRenderer)findViewById(R.id.cameraview);
         mSC = ShaderCamera.getInstance(mRenderer);
 
-        startButton = (Button)findViewById(R.id.start_camera);
-        stopButton = (Button)findViewById(R.id.stop_camera);
-        flipButton = (Button)findViewById(R.id.flip_camera);
-        setFilterButton = (Button)findViewById(R.id.set_filter_button);
+        button1 = (Button)findViewById(R.id.filter_1);
+        button2 = (Button)findViewById(R.id.filter_2);
+        button3 = (Button)findViewById(R.id.filter_3);
+        button4 = (Button)findViewById(R.id.filter_4);
 
-        startButton.setOnClickListener(new View.OnClickListener() {
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_MANGA);
+                mSC.setFilter(ShaderFilterType.FILTER_CHOCOLATE);
             }
         });
 
-        stopButton.setOnClickListener(new View.OnClickListener() {
+        button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_RISE);
+                mSC.setFilter(ShaderFilterType.FILTER_LIVE);
             }
         });
 
-        flipButton.setOnClickListener(new View.OnClickListener() {
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mSC.setFilter(ShaderFilterType.FILTER_ICE);
+            }
+        });
+
+        button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mSC.setFilter(ShaderFilterType.FILTER_NONE);
-            }
-        });
-
-        setFilterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_MENTAL);
             }
         });
     }
