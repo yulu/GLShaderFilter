@@ -19,6 +19,9 @@
 precision mediump float;
 
 uniform samplerExternalOES sTexture;
+uniform sampler2D uTexture;
+uniform vec2 uPixelSize;
+
 varying vec2 vTextureCoord;
 
 const float PI = 3.14159265;

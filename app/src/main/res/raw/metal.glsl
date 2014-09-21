@@ -1,7 +1,17 @@
 vec3 filter(vec3 color) {
-    vec3 layer = RadiusGradient(vec3(1., 1., 1.), vec3(0.1, 0.1, 0.1), vec2(0.5, 0.5));
+    vec2 tc = (2.0 * vTextureCoord) - 1.0;
+    float d = dot(tc, tc);
 
-    color = BrightnessContrastSaturation(color, 1.2, 1.2, 1.2);
-    //return mix(color, MultiplyBlender(color, layer), 0.7);
-    return MultiplyBlender(color, layer, 0.8);
+    vec2 lookup = vec2(d, color.r);
+    color.r = texture2D(uTexture, lookup).r;
+    lookup.y = color.g;
+    color.g = texture2D(uTexture, lookup).g;
+    lookup.y = color.b;
+    color.b	= texture2D(uTexture, lookup).b;
+
+
+    color.b = (color.b*(228.-28.) + 28.)/255.;
+
+
+    return BrightnessContrastSaturation(color, 1., 1.1, 1.);
 }

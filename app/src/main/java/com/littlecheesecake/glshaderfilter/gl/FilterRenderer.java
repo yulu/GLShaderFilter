@@ -7,9 +7,8 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Surface;
 
+import com.littlecheesecake.glshaderfilter.R;
 import com.littlecheesecake.glshaderfilter.api.ShaderFilterType;
 
 import java.nio.ByteBuffer;
@@ -30,7 +29,7 @@ public class FilterRenderer extends GLSurfaceView
 
     //SurfaceTexture, related to camera
     private SurfaceTexture mSurfaceTexture;
-    private OESTexture mCameraTexture;
+    private Texture mCameraTexture;
     private int mWidth, mHeight;
     private boolean updateTexture = false;
 
@@ -40,6 +39,7 @@ public class FilterRenderer extends GLSurfaceView
     private float[] mRatioPreview = new float[2];
     private float mOrientationM[] = new float[16];
     private float[] mTransformM = new float[16];
+    private float[] mPixelSize = new float[2];
 
     //listener
     private SurfaceChangedListener listener;
@@ -73,7 +73,7 @@ public class FilterRenderer extends GLSurfaceView
 
         //set up the shader
         filterShader = new Shader(context);
-        mCameraTexture = new OESTexture();
+        mCameraTexture = new Texture();
     }
 
     public interface SurfaceChangedListener {
@@ -124,15 +124,21 @@ public class FilterRenderer extends GLSurfaceView
             int uOrientation = filterShader.getHandle("uOrientationM");
             int uRatio = filterShader.getHandle("uRatio");
             int uRatioPreview = filterShader.getHandle("uRatioPreview");
-
+            int uTextureUniformHandle = filterShader.getHandle("uTexture");
+            int uPixelSize = filterShader.getHandle("uPixelSize");
 
             GLES20.glUniformMatrix4fv(uTransform, 1, false, mTransformM, 0);
             GLES20.glUniformMatrix4fv(uOrientation, 1, false, mOrientationM, 0);
             GLES20.glUniform2fv(uRatio, 1, mRatio, 0);
             GLES20.glUniform2fv(uRatioPreview, 1, mRatioPreview, 0);
+            GLES20.glUniform2fv(uPixelSize, 1, mPixelSize, 0);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mCameraTexture.getTextureId());
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mCameraTexture.getTextureIdOES(0));
+
+            filterShader.useTexture(0);
+
+            GLES20.glUniform1i(uTextureUniformHandle, 1);
 
             renderQuad(filterShader.getHandle("aPosition"));
         }
@@ -156,11 +162,14 @@ public class FilterRenderer extends GLSurfaceView
         mRatio[0] = (float) Math.min(mWidth, mHeight) / mWidth;
         mRatio[1] = (float) Math.min(mWidth, mHeight) / mHeight;
 
-        //set up surfacetexture------------------
-        mCameraTexture.init();
+        mPixelSize[0] = (float) 1.0/mWidth;
+        mPixelSize[1] = (float) 1.0/mHeight;
+
+        //set up SurfaceTexture------------------
+        mCameraTexture.initCameraFrame(0);
 
         SurfaceTexture oldSurfaceTexture = mSurfaceTexture;
-        mSurfaceTexture = new SurfaceTexture(mCameraTexture.getTextureId());
+        mSurfaceTexture = new SurfaceTexture(mCameraTexture.getTextureIdOES(0));
         mSurfaceTexture.setOnFrameAvailableListener(this);
         if(oldSurfaceTexture != null){
             oldSurfaceTexture.release();
@@ -245,6 +254,12 @@ public class FilterRenderer extends GLSurfaceView
 
     }
 
+    public void onPause() {
+        super.onPause();
+        mSurfaceTexture.release();
+        filterShader.deleteProgram();
+
+    }
 
     private void renderQuad(int aPosition) {
         GLES20.glVertexAttribPointer(aPosition, 2, GLES20.GL_BYTE, false, 0, mFullQuadVertices);

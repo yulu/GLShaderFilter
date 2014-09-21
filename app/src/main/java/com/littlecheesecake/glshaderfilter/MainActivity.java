@@ -38,14 +38,14 @@ public class MainActivity extends Activity {
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_CHOCOLATE);
+                mSC.setFilter(ShaderFilterType.FILTER_METAL);
             }
         });
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_LIVE);
+                mSC.setFilter(ShaderFilterType.FILTER_OLDTIME);
             }
         });
 
@@ -88,6 +88,7 @@ public class MainActivity extends Activity {
     public void onPause(){
         super.onPause();
         mSC.stopCamera();
+        mRenderer.onPause();
     }
 
     @Override
@@ -101,7 +102,6 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        mRenderer.onResume();
         mSC.registerCamera(mRenderer);
     }
 }

@@ -269,8 +269,6 @@ public class FilterCamera implements FilterRenderer.SurfaceChangedListener, Disp
         }
     }
 
-
-
     public static class CameraSizeAccessor implements ListItemAccessor {
 
         public int getWidth(Object obj) {

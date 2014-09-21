@@ -5,16 +5,14 @@ package com.littlecheesecake.glshaderfilter.api;
  */
 public class ShaderFilterType {
     public static final int FILTER_NONE = 0x00;
-    public static final int FILTER_SILENCE = 0x02;
-    public static final int FILTER_SUN = 0x03;
-    public static final int FILTER_MENTAL = 0x04;
+    public static final int FILTER_SILENCE = 0x02; //gray
+    public static final int FILTER_MAY= 0x03;
+    public static final int FILTER_METAL = 0x04;
     public static final int FILTER_ICE = 0x05;
     public static final int FILTER_LIVE = 0x06;
     public static final int FILTER_OLDTIME = 0x07;
-    public static final int FILTER_MAY = 0x08;
-    public static final int FILTER_FIREWORKS = 0x09;
-    public static final int FILTER_CHOCOLATE = 0x0a;
-    public static final int FILTER_DREAMY = 0x0b;
+    public static final int FILTER_CHOCOLATE = 0x08;
+    public static final int FILTER_DREAMY = 0x09;
 
     public static final int FILTER_MANGA = 0x10;
     public static final int FILTER_POP = 0x11;

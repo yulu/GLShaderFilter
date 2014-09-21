@@ -33,13 +33,13 @@ public class ShaderCamera{
         mFilterRenderer.RegisterSurfaceChangedListener(mFilterCamera);
     }
 
+
     /**
      * Start or restart the camera, this method needs to be called in OnResume()
      * or whenever the you want to restart a stopped camera view when the renderer surface is not destroyed
      */
     public void restartCamera(FilterRenderer renderer) {
         mFilterRenderer = renderer;
-
         mFilterCamera.onResume(mFilterRenderer.getSurfaceTexture(), mFilterRenderer.getSurfaceSize());
     }
 

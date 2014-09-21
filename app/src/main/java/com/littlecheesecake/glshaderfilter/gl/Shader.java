@@ -30,6 +30,9 @@ public class Shader {
     private String fragmentSource;
     private String filterSource;
 
+    //texture handle
+    private Texture mTexture;
+
     //shader filter type
     private int filterType = -1;
 
@@ -41,6 +44,7 @@ public class Shader {
      */
     public Shader(Context context){
         mContext = context;
+        mTexture = new Texture();
     }
 
     /**
@@ -87,17 +91,20 @@ public class Shader {
             case ShaderFilterType.FILTER_SILENCE:
                 filterShaderRawId = R.raw.silence;
                 break;
-            case ShaderFilterType.FILTER_MENTAL:
+            case ShaderFilterType.FILTER_METAL:
                 filterShaderRawId = R.raw.metal;
-                break;
-            case ShaderFilterType.FILTER_SUN:
-                filterShaderRawId = R.raw.sun;
+                mTexture.loadTextures(mContext, 1, new int[]{
+                    R.drawable.mapping2} );
                 break;
             case ShaderFilterType.FILTER_ICE:
                 filterShaderRawId = R.raw.ice;
+                mTexture.loadTextures(mContext, 1, new int[]{
+                        R.drawable.mapping} );
                 break;
             case ShaderFilterType.FILTER_LIVE:
                 filterShaderRawId = R.raw.live;
+                mTexture.loadTextures(mContext, 1, new int[]{
+                        R.drawable.mapping2} );
                 break;
             case ShaderFilterType.FILTER_DREAMY:
                 filterShaderRawId = R.raw.dreamy;
@@ -105,19 +112,23 @@ public class Shader {
             case ShaderFilterType.FILTER_CHOCOLATE:
                 filterShaderRawId = R.raw.chocolate;
                 break;
-            case ShaderFilterType.FILTER_FIREWORKS:
-                filterShaderRawId = R.raw.fireworks;
-                break;
             case ShaderFilterType.FILTER_OLDTIME:
                 filterShaderRawId = R.raw.oldtime;
+                mTexture.loadTextures(mContext, 2, new int[]{
+                        R.drawable.edge,
+                        R.drawable.noise} );
                 break;
             case ShaderFilterType.FILTER_MAY:
                 filterShaderRawId = R.raw.may;
+                mTexture.loadTextures(mContext, 1, new int[]{
+                        R.drawable.mapping} );
                 break;
 
 
             default:
                 filterShaderRawId = R.raw.none;
+                mTexture.loadTextures(mContext, 1, new int[]{
+                        R.drawable.mapping} );
                 break;
 
         }
@@ -239,6 +250,13 @@ public class Shader {
         }
 
         return res;
+    }
+
+    public void useTexture(int id) {
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexture.getTextureId(id));
+
     }
 
     private int loadShader(int shaderType, String source) throws Exception {
