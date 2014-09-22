@@ -28,7 +28,9 @@ public class ShaderCamera{
      * @param renderer
      */
     public void registerCamera(FilterRenderer renderer) {
-        mFilterCamera = new FilterCamera();
+        if(mFilterCamera == null)
+            mFilterCamera = new FilterCamera();
+
         mFilterRenderer = renderer;
         mFilterRenderer.RegisterSurfaceChangedListener(mFilterCamera);
     }
@@ -41,6 +43,7 @@ public class ShaderCamera{
     public void restartCamera(FilterRenderer renderer) {
         mFilterRenderer = renderer;
         mFilterCamera.onResume(mFilterRenderer.getSurfaceTexture(), mFilterRenderer.getSurfaceSize());
+
     }
 
     /**

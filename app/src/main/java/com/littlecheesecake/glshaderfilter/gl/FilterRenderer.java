@@ -37,7 +37,7 @@ public class FilterRenderer extends GLSurfaceView
     private ByteBuffer mFullQuadVertices;
     private float[] mRatio = new float[2];
     private float[] mRatioPreview = new float[2];
-    private float mOrientationM[] = new float[16];
+    private float[] mOrientationM = new float[16];
     private float[] mTransformM = new float[16];
     private float[] mPixelSize = new float[2];
 
@@ -61,7 +61,7 @@ public class FilterRenderer extends GLSurfaceView
         mContext = context;
 
         //init screen quad geometry data
-        final byte FULL_QUAD_COORDS[] = { -1, 1, -1, -1, 1, 1, 1, -1};;
+        final byte FULL_QUAD_COORDS[] = { -1, 1, -1, -1, 1, 1, 1, -1};
         mFullQuadVertices = ByteBuffer.allocateDirect(4 * 2);
         mFullQuadVertices.put(FULL_QUAD_COORDS).position(0);
 
@@ -155,7 +155,7 @@ public class FilterRenderer extends GLSurfaceView
             Matrix.setRotateM(mOrientationM, 0, 90.0f, 0f, 0f, 1f);
         }
         else {
-            Matrix.setRotateM(mOrientationM, 0, 00.0f, 0f, 0f, 1f);
+            Matrix.setRotateM(mOrientationM, 0,  0.0f, 0f, 0f, 1f);
         }
 
         //set ratio
@@ -166,14 +166,14 @@ public class FilterRenderer extends GLSurfaceView
         mPixelSize[1] = (float) 1.0/mHeight;
 
         //set up SurfaceTexture------------------
-        mCameraTexture.initCameraFrame(0);
+        /*mCameraTexture.initCameraFrame(0);
 
         SurfaceTexture oldSurfaceTexture = mSurfaceTexture;
         mSurfaceTexture = new SurfaceTexture(mCameraTexture.getTextureIdOES(0));
         mSurfaceTexture.setOnFrameAvailableListener(this);
         if(oldSurfaceTexture != null){
             oldSurfaceTexture.release();
-        }
+        }*/
 
         //for camera, width is always larger than height;
         int surfaceWidth, surfaceHeight;
@@ -245,20 +245,28 @@ public class FilterRenderer extends GLSurfaceView
         }
     }
 
-    /**
-     * when the surface destroys
-     */
-    public void onDestroy(){
-        updateTexture = false;
-        mSurfaceTexture.release();
+
+    public void onPause() {
+        super.onDetachedFromWindow();
+        super.onPause();
+        //mSurfaceTexture.release();
+        filterShader.deleteProgram();
 
     }
 
-    public void onPause() {
-        super.onPause();
-        mSurfaceTexture.release();
-        filterShader.deleteProgram();
 
+    public synchronized void onResume() {
+        super.onAttachedToWindow();
+        mCameraTexture.initCameraFrame(0);
+
+        SurfaceTexture oldSurfaceTexture = mSurfaceTexture;
+        mSurfaceTexture = new SurfaceTexture(mCameraTexture.getTextureIdOES(0));
+        mSurfaceTexture.setOnFrameAvailableListener(this);
+        if(oldSurfaceTexture != null){
+            oldSurfaceTexture.release();
+        }
+
+        super.onResume();
     }
 
     private void renderQuad(int aPosition) {

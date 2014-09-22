@@ -1,9 +1,13 @@
 package com.littlecheesecake.glshaderfilter;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.view.View;
 import android.widget.Button;
 
@@ -38,56 +42,43 @@ public class MainActivity extends Activity {
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_METAL);
+                mSC.setFilter(ShaderFilterType.FILTER_NONE);
             }
         });
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_OLDTIME);
+                mSC.switchCamera();
             }
         });
 
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_ICE);
+                mSC.pauseCamera();
             }
         });
 
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mSC.setFilter(ShaderFilterType.FILTER_NONE);
+                mSC.restartCamera(mRenderer);
             }
         });
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onPause(){
         super.onPause();
-        mSC.stopCamera();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mSC.pauseCamera();
         mRenderer.onPause();
     }
 
@@ -98,10 +89,11 @@ public class MainActivity extends Activity {
         mSC.restartCamera(mRenderer);
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
         mSC.registerCamera(mRenderer);
     }
+
+
 }

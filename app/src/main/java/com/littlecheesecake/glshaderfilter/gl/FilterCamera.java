@@ -80,6 +80,7 @@ public class FilterCamera implements FilterRenderer.SurfaceChangedListener, Disp
      */
     public void onResume(SurfaceTexture s, int[] mSurfaceSize){
         setDimension(mSurfaceSize[0], mSurfaceSize[1]);
+
         try {
             setPreviewTexture(s);
         } catch (Exception e) {

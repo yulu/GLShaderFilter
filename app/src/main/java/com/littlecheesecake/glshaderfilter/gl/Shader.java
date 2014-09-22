@@ -114,9 +114,8 @@ public class Shader {
                 break;
             case ShaderFilterType.FILTER_OLDTIME:
                 filterShaderRawId = R.raw.oldtime;
-                mTexture.loadTextures(mContext, 2, new int[]{
-                        R.drawable.edge,
-                        R.drawable.noise} );
+                mTexture.loadTextures(mContext, 1, new int[]{
+                        R.drawable.edge} );
                 break;
             case ShaderFilterType.FILTER_MAY:
                 filterShaderRawId = R.raw.may;
